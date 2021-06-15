@@ -1,0 +1,12 @@
+/.idea
+/__pycache__
+/custom_function/__pycache__
+/deploy/__pycache__
+/model/net/__pycache__
+/model/net_test/__pycache__
+resnet.trt
+resnet.onnx
+resnet.cache
+test.txt
+test.jpg
+
