@@ -3,7 +3,7 @@ import torchvision
 import torch.onnx
 import onnx
 import os
-from test import class_net_test
+from solver.class_net_test import class_net_test
 
 class torch2onnx(class_net_test):
 
@@ -19,7 +19,7 @@ class torch2onnx(class_net_test):
         input_w,input_h = config.datasets.transform.test.kwargs.size
         input_c = 3
 
-        print(input_w,input_h)
+        # print(input_w,input_h)
 
         input = torch.randn(self.batch_size,input_c,input_h,input_w).cuda()
 
@@ -32,7 +32,7 @@ class torch2onnx(class_net_test):
         save_path = save_dir + config.torch2onnx.save_filename
 
         torch.onnx.export(self.model, input,
-                          save_path, verbose=True,
+                          save_path, verbose=False,
                           input_names=input_name, output_names=output_name,
                           dynamic_axes = {'input': {0: 'batch_size'},
                                           'output': {0: 'batch_size'}})

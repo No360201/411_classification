@@ -42,3 +42,4 @@ class VGGDataset(Dataset):
             return len(self.img_datas.imgs)
         else:
             return len(self.img_val.imgs)
+

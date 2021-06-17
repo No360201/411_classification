@@ -3,6 +3,8 @@ from test import class_net_test
 from easydict import EasyDict
 import yaml
 import argparse
+import os
+import torch
 
 
 
@@ -17,5 +19,16 @@ if __name__ == "__main__":
         config = yaml.load(f, Loader=yaml.FullLoader)
     config = EasyDict(config)
     S = class_net_test(config,args.model_path)
-    S.test(config)
+
+    class_idx_dict_cover = S.dataset_train.img_datas.class_to_idx
+    class_idx_dict = {k: v for v, k in class_idx_dict_cover.items()}
+
+    for i, data in enumerate(S.data_loader, 0):
+        img, label, _ = data
+        img = torch.autograd.Variable(img).cuda()
+        s, doubt, res = S.test_img(img, score_thr=config.pretrain.con_thr)
+
+        print("img_path: ", _)
+        print("prdicted_label: ",class_idx_dict[int(res)])
+
 

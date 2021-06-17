@@ -1,0 +1,64 @@
+Train config: 
+model : 
+	arch : resnet50
+	kwargs : {'num_classes': 300}
+epoch : 30
+work_dir : ./experiment/test/
+pretrain : 
+	load_all_model : True
+	con_thr : 0.5
+	checkpoint_path : /media/a/新加卷/classnet/models/
+datasets : 
+	batch_size : 24
+	transform : {'train': {'type': 'transform_train', 'kwargs': {'size': [224, 224]}}, 'test': {'type': 'transform_test', 'kwargs': {'size': [224, 224]}}}
+	train : {'type': 'VGGDataset', 'kwargs': {'train': True, 'train_path': '/media/a/新加卷/classnet/wenwu/train_data'}}
+	test : {'type': 'VGGDataset', 'kwargs': {'train': False, 'test_path': '/media/a/新加卷/classnet/wenwu/small_test'}}
+criterion : 
+	type : Criterion
+	kwargs : {'type': 'CrossEntropy'}
+optimiter : 
+	type : SGD
+	kwargs : {'momentum': 0.9, 'lr': 0.01, 'weight_decay': 0.0}
+lr_scheduler : 
+	type : COSINE
+	max_iter : 300000
+	min_lr : 0
+	base_lr : 0.0003
+	warmup_steps : 500
+	warmup_lr : 0.0001
+	last_iter : -1
+	optimizer : SGD (
+Parameter Group 0
+    dampening: 0
+    initial_lr: 0.01
+    lr: 0.01
+    momentum: 0.9
+    nesterov: False
+    weight_decay: 0.0
+)
+evaluation : 
+	accuracy : True
+	category_prec_rec : True
+	doubt_ratio : True
+	F_score : 1
+	Kappa : True
+deploy : 
+	onnx : True
+	tensorrt : True
+torch2onnx : 
+	dynamic_axis : True
+	batch_size : 1
+	save_filename : resnet.onnx
+onnx_trt : 
+	fp16_mode : False
+	int8_mode : True
+	max_batch_size : 1
+	onnx_filename : resnet.onnx
+	save_engine : True
+	engine_filename : resnet.trt
+	test_image_path : ./deploy/test.jpg
+	calib_images_dir : /media/a/新加卷/classnet/wenwu/test/0
+	cache_filename : resnet.cache
+Loss: epoch: 0 iter_num: 0 loss: 5.968529224395752
+Loss: epoch: 0 iter_num: 1 loss: 5.925718784332275
+Loss: epoch: 0 iter_num: 2 loss: 6.177511215209961

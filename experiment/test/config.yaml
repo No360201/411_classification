@@ -15,6 +15,7 @@ datasets:
   batch_size: 24
   transform: 
     train:
+
       type: transform_train
       kwargs:
         size: [224,224]
@@ -61,6 +62,7 @@ evaluation:
     doubt_ratio: True
     F_score: 1
     Kappa: True
+    compare_metric: ['acc']
 
 deploy:
     onnx: True
