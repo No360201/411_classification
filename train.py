@@ -17,7 +17,7 @@ from datasets import build_dataset,build_aug
 from utils.optimizer import build_optimizer
 from utils.scheduler import get_scheduler
 from utils.criterion import build_criterion
-from solver.class_net_train import class_net_train
+from core.class_net_train import class_net_train
 from utils.logger import Logger
 from tqdm import tqdm
 
