@@ -10,7 +10,7 @@ import heapq
 from torch.utils.data import Dataset, DataLoader
 from collections import defaultdict
 
-from solver.class_net_test import class_net_test
+from core.class_net_test import class_net_test
 
 from deploy.torch2onnx import torch2onnx
 from deploy.calib import CenterNetEntropyCalibrator
