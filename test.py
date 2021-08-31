@@ -12,9 +12,9 @@ from collections import defaultdict
 
 from core.class_net_test import class_net_test
 
-from deploy.torch2onnx import torch2onnx
-from deploy.calib import CenterNetEntropyCalibrator
-from deploy.onnxtrt import get_engine,run_trt
+# from deploy.torch2onnx import torch2onnx
+# from deploy.calib import CenterNetEntropyCalibrator
+# from deploy.onnxtrt import get_engine,run_trt
 
 
 
@@ -43,13 +43,14 @@ def test_multiple_models(config,config_path):
     best_model_path = ''
 
     compare_metric = config.evaluation.compare_metric
-
-    print(os.listdir(config.pretrain.checkpoint_path))
-    for model in os.listdir(config.pretrain.checkpoint_path):
+    models_path = os.path.join(config.work_dir,"models")
+    # models_path = "/media/a/新加卷/classnet/models"
+    print(models_path)
+    for model in os.listdir(models_path):
         print("aaaa")
         print(model)
-        if model.endswith(".pkl"):
-            model_path = config.pretrain.checkpoint_path + model
+        if model.endswith(".pth"):
+            model_path = os.path.join(models_path,model)
             print(model_path)
             S = class_net_test(config,model_path)
             res, time_consume = S.test(config)
@@ -62,6 +63,7 @@ def test_multiple_models(config,config_path):
 
             if compare_flag:
                 best_model_path = model_path
+                best_model_metric = res
 
             if info_init:
                 metric_info['network'] = S.model
@@ -83,22 +85,22 @@ def test_multiple_models(config,config_path):
         torch.cuda.empty_cache()
 
 
-    if config.deploy.onnx:
-        S = torch2onnx(config,best_model_path)         ##torch_onnx
-        S.transfer(config)
+    # if config.deploy.onnx:
+    #     S = torch2onnx(config,best_model_path)         ##torch_onnx
+    #     S.transfer(config)
+    #
+    #     if config.deploy.tensorrt:
+    #         calib = None
+    #                            ##onnx_trt
+    #         if config.onnx_trt.int8_mode:
+    #             cache_path = os.path.join(config.work_dir,'deploy',config.onnx_trt.cache_filename)
+    #             calib = CenterNetEntropyCalibrator(config.onnx_trt.calib_images_dir,cache_path)
+    #             get_engine(config,calib)         ## 生成engine
+    #             cls_res, times = run_trt(config,calib)            ## 运行engine
+    #
+    #             metric_info['best_checkpoint']['time_consume_tensorrt'] = times
 
-        if config.deploy.tensorrt:
-            calib = None
-                               ##onnx_trt
-            if config.onnx_trt.int8_mode:
-                cache_path = os.path.join(config.work_dir,'deploy',config.onnx_trt.cache_filename)
-                calib = CenterNetEntropyCalibrator(config.onnx_trt.calib_images_dir,cache_path)
-                get_engine(config,calib)         ## 生成engine
-                cls_res, times = run_trt(config,calib)            ## 运行engine
-
-                metric_info['best_checkpoint']['time_consume_tensorrt'] = times
-
-    test_data_path = os.path.join(os.path.dirname(config_path),'models','test_results.txt')
+    test_data_path = os.path.join(os.path.dirname(config_path),'logs','test_results.txt')
 
     with open(test_data_path, 'w') as f:
         for key,val in metric_info.items():

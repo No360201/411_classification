@@ -21,7 +21,7 @@ class class_net_test(object):
         self.config = config
         self.creat_dataset(self.config.datasets)
         self.creat_model(self.config.model)
-        self.load_pretrained(self.config, model_path)
+        self.load_model(self.config, model_path)
 
     def creat_model(self, config):
         print("creating model")
@@ -35,24 +35,32 @@ class class_net_test(object):
         self.dataset_train, self.dataset_test = build_dataset(config, self.transform_train, self.transform_test)
         self.data_loader = DataLoader(self.dataset_test, batch_size=1, shuffle=False)
 
-    def load_pretrained(self, config, model_path):
+
+    def load_model(self,config,model_path):
         print("loading")
-        config = config.pretrain
-        if config.load_all_model:
-            dic = torch.load(model_path, map_location=lambda storage, loc: storage)
-            self.model.load_state_dict(dic)
-        else:
-            model_dict = self.model.state_dict()
-            pretrained = torch.load(model_path)
-            pretrained_dict = {}
-            for k in pretrained.keys():
-                if k in config.ignore:
-                    continue
-                pretrained_dict.update({k: pretrained[k]})
-            model_dict.update(pretrained_dict)
-            self.model.load_state_dict(model_dict)
+        dic = torch.load(model_path, map_location=lambda storage, loc: storage)
+        self.model.load_state_dict(dic['net'])
         self.model.cuda()
         self.model.eval()
+
+    # def load_pretrained(self, config, model_path):
+    #     print("loading")
+    #     config = config.pretrain
+    #     if config.load_all_model:
+    #         dic = torch.load(model_path, map_location=lambda storage, loc: storage)
+    #         self.model.load_state_dict(dic)
+    #     else:
+    #         model_dict = self.model.state_dict()
+    #         pretrained = torch.load(model_path)
+    #         pretrained_dict = {}
+    #         for k in pretrained.keys():
+    #             if k in config.ignore:
+    #                 continue
+    #             pretrained_dict.update({k: pretrained[k]})
+    #         model_dict.update(pretrained_dict)
+    #         self.model.load_state_dict(model_dict)
+    #     self.model.cuda()
+    #     self.model.eval()
 
     def test_img(self, img, score_thr):
         # img_test = torch.unsqueeze(img, 0)
@@ -186,7 +194,7 @@ class class_net_test(object):
             label = torch.autograd.Variable(label).cuda()
 
             start = time.time()
-            s, doubt, res = self.test_img(img, score_thr=self.config.pretrain.con_thr)
+            s, doubt, res = self.test_img(img, score_thr=self.config.evaluation.con_thr)
             end = time.time()
             time_consume = (end - start) / self.data_loader.batch_size
 
