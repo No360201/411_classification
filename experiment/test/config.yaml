@@ -5,17 +5,17 @@ model:
 
 epoch: 30
 work_dir: ./experiment/test/
+resume: True
 
 pretrain:
-  load_all_model: True
-  con_thr: 0.5
-  checkpoint_path: /media/a/新加卷/classnet/models/     #models to be tested
+  load_pretrained: True
+  ignore: []
+  pretrained_path: ./experiment/test/pretrain/mobilenet_v2-b0353104.pth
 
 datasets:
   batch_size: 24
   transform: 
     train:
-
       type: transform_train
       kwargs:
         size: [224,224]
@@ -27,7 +27,7 @@ datasets:
     type: VGGDataset
     kwargs:
       train: True
-      train_path: /media/a/新加卷/classnet/wenwu/train_data
+      train_path: /media/a/新加卷/classnet/wenwu/small_test
   test:
     type: VGGDataset
     kwargs:
@@ -57,6 +57,7 @@ lr_scheduler:
     last_iter: -1
 
 evaluation:
+    con_thr: 0.5
     accuracy: True
     category_prec_rec: True
     doubt_ratio: True

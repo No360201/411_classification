@@ -46,6 +46,24 @@ class _LRScheduler(object):
         for param_group, lr in zip(self.optimizer.param_groups, self._get_new_lr()):
             param_group['lr'] = lr
 
+    def state_dict(self):
+        """Returns the state of the scheduler as a :class:`dict`.
+
+        It contains an entry for every variable in self.__dict__ which
+        is not the optimizer.
+        """
+        return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
+
+    def load_state_dict(self, state_dict):
+        """Loads the schedulers state.
+
+        Arguments:
+            state_dict (dict): scheduler state. Should be an object returned
+                from a call to :meth:`state_dict`.
+        """
+        self.__dict__.update(state_dict)
+
+
 class _WarmUpLRScheduler(_LRScheduler):
 
     def __init__(self, optimizer, base_lr, warmup_lr, warmup_steps, last_iter=-1):
@@ -68,7 +86,7 @@ class StepLRScheduler(_WarmUpLRScheduler):
     def __init__(self, optimizer, milestones, lr_mults, base_lr, warmup_lr, warmup_steps, last_iter=-1):
         super(StepLRScheduler, self).__init__(optimizer, base_lr, warmup_lr, warmup_steps, last_iter)
 
-        assert len(milestones) == len(lr_mults), "{} vs {}".format(milestone, lr_mults)
+        assert len(milestones) == len(lr_mults), "{} vs {}".format(milestones, lr_mults)
         for x in milestones:
             assert isinstance(x, int)
         if not list(milestones) == sorted(milestones):

@@ -25,14 +25,49 @@ from tqdm import tqdm
 class classnet_train(class_net_train):
     def __init__(self,config,log_path):
         super().__init__(config)
+        self.start_epoch = -1
+
+        if self.resume_model():
+            print("resume model!")
+        elif config.pretrain.load_pretrained:
+            self.load_pretrained(self.config.pretrain)
+
         self.logger = Logger(logname=log_path, logger="Loss").getlog()
 
+    def load_pretrained(self,config):
+        model_dict = self.model.state_dict()
+        pretrained = torch.load(config.pretrained_path)
+        pretrained_dict = {}
+        for k in pretrained.keys():
+            if k in config.ignore or k not in model_dict:
+                continue
+            pretrained_dict.update({k: pretrained[k]})
+        model_dict.update(pretrained_dict)
+        self.model.load_state_dict(model_dict,strict=False)
+        self.model.cuda()
+
+    def resume_model(self):
+        if self.config.resume:
+            models_path = os.path.join(self.config.work_dir,'models')
+            models = os.listdir(models_path)
+            models.sort(key=lambda x:int(x[:-4]))
+            if len(models):
+                latest_checkpoint_path = os.path.join(models_path,models[-1])
+                print(latest_checkpoint_path)
+                checkpoint = torch.load(latest_checkpoint_path)
+                self.model.load_state_dict(checkpoint['net'])
+                self.optimizer.load_state_dict(checkpoint['optimizer'])
+                self.lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+                self.start_epoch = checkpoint['epoch']
+
+                return True
+        return False
 
 
     def train(self):
         print(self.dataset_train.img_datas.class_to_idx)
         print("training")
-        for epo in range(self.config.epoch):
+        for epo in range(self.start_epoch + 1,self.config.epoch):
             self.lr_scheduler.step()
             time_start=time.time()
             for i, data in enumerate(self.data_loader, 0):
@@ -61,12 +96,22 @@ class classnet_train(class_net_train):
 
                 loss.backward()
                 self.optimizer.step()
+
+            print(self.optimizer)
             if epo%5==1:
                 model_save_dir = self.config.work_dir + 'models/'
                 if not os.path.exists(model_save_dir):
                     os.mkdir(model_save_dir)
 
-                torch.save(self.model.state_dict(), model_save_dir + str(epo)+'.pkl')
-                torch.save(self.model, model_save_dir + str(epo)+'.pth')
+                checkpoint = {
+                    "net": self.model.state_dict(),
+                    'optimizer': self.optimizer.state_dict(),
+                    "epoch": epo,
+                    'lr_scheduler': self.lr_scheduler.state_dict()
+                }
+
+                torch.save(checkpoint,model_save_dir + "%s.pth" % str(epo))
+                # torch.save(self.model.state_dict(), model_save_dir + str(epo)+'.pkl')
+                # torch.save(self.model, model_save_dir + str(epo)+'.pth')
             time_end=time.time()
             print(time_end-time_start)
