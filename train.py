@@ -18,6 +18,7 @@ from utils.optimizer import build_optimizer
 from utils.scheduler import get_scheduler
 from utils.criterion import build_criterion
 from core.class_net_train import class_net_train
+from core.model_state_dict import densenet_state_dict,model_state_dict
 from utils.logger import Logger
 from tqdm import tqdm
 
@@ -36,15 +37,14 @@ class classnet_train(class_net_train):
 
     def load_pretrained(self,config):
         model_dict = self.model.state_dict()
-        pretrained = torch.load(config.pretrained_path)
-        pretrained_dict = {}
-        for k in pretrained.keys():
-            if k in config.ignore or k not in model_dict:
-                continue
-            pretrained_dict.update({k: pretrained[k]})
-        model_dict.update(pretrained_dict)
-        self.model.load_state_dict(model_dict,strict=False)
+        if self.config.model.arch.find('densenet') >= 0:
+            state_dict = densenet_state_dict(config)
+        else:
+            state_dict = model_state_dict(model_dict,config)
+
+        self.model.load_state_dict(state_dict,strict=False)
         self.model.cuda()
+
 
     def resume_model(self):
         if self.config.resume:
@@ -93,6 +93,7 @@ class classnet_train(class_net_train):
                         else:
                             self.logger.info(str(key) + " : " + str(val))
                 self.logger.info("Loss: epoch: " + str(epo) + " iter_num: " + str(i) + " loss: " + str(loss.item()))
+                print("Loss: ",str(loss.item()))
 
                 loss.backward()
                 self.optimizer.step()
