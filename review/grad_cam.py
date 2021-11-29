@@ -130,6 +130,7 @@ class GradCAM(_BaseWrapper):
 
         def backward_hook(module, grad_in, grad_out):
             # Save the gradients correspond to the featuremaps
+
             self.grad_pool[id(module)] = grad_out[0].detach()
 
         # If any candidates are not specified, the hook is registered to all the layers.

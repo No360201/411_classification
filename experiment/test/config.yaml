@@ -1,38 +1,38 @@
 model:
-  arch: resnet50
+  arch: vgg16
   kwargs:
     num_classes: 300
 
-epoch: 30
+epoch: 45
 work_dir: ./experiment/test/
-resume: True
+resume: False
 
 pretrain:
   load_pretrained: True
   ignore: []
-  pretrained_path: ./experiment/test/pretrain/mobilenet_v2-b0353104.pth
+  pretrained_path: experiment/test/pretrain/vgg16-397923af.pth
 
 datasets:
-  batch_size: 24
+  batch_size: 16
   transform: 
     train:
       type: transform_train
       kwargs:
-        size: [224,224]
+        size: [160,160]
     test:
       type: transform_test
       kwargs:
-        size: [224,224]
+        size: [160,160]
   train:
     type: VGGDataset
     kwargs:
       train: True
-      train_path: /media/a/新加卷/classnet/wenwu/small_test
+      train_path: /media/a/新加卷/classnet/wenwu/train_data
   test:
     type: VGGDataset
     kwargs:
       train: False
-      test_path: /media/a/新加卷/classnet/wenwu/small_test
+      test_path: /media/a/新加卷/classnet/wenwu/test_data
 
 
 criterion:
@@ -44,16 +44,16 @@ optimiter:
   type: SGD
   kwargs:
     momentum: 0.9
-    lr: 0.01
+    lr: 0.00005
     weight_decay: 0.0
   
 lr_scheduler: 
     type: COSINE
-    max_iter: 300000
+    max_iter: 40
     min_lr: 0
-    base_lr: 0.0003
-    warmup_steps: 500
-    warmup_lr: 0.0001
+    base_lr: 0.00005
+    warmup_steps: 2
+    warmup_lr: 0.00015
     last_iter: -1
 
 evaluation:
@@ -85,6 +85,12 @@ onnx_trt:
    test_image_path: ./deploy/test.jpg
    calib_images_dir: /media/a/新加卷/classnet/wenwu/test/0  #绝对路径
    cache_filename: resnet.cache
+
+
+review:
+   image_path: ../test1.jpg
+   model_path: ../experiment/test/exp1/vgg_org_lr_15e-5/models/26.pth
+   visualize_layers: ["features"]
 
 
 
