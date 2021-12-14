@@ -3,7 +3,7 @@ import torchvision
 import torch.onnx
 import onnx
 import os
-from solver.class_net_test import class_net_test
+from core.class_net_test import class_net_test
 
 class torch2onnx(class_net_test):
 
